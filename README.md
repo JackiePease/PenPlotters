@@ -12,7 +12,7 @@ https://github.com/evil-mad/axidraw/issues/16 – prevent scaling issues, missin
 
 and this https://stackoverflow.com/questions/15335926/how-to-use-the-svg-viewbox-attribute
 includes the following:
-"In my humble experience, I've always considered <svg>’s viewbox values as a required image ratio to apply to the width and height values. While defining the laters just I do with any <img> in the DOM, either inline HTML properties or via CSS, viewbox property only applies to the SVG file."
+>"In my humble experience, I've always considered <svg>’s viewbox values as a required image ratio to apply to the width and height values. While defining the >laters just I do with any <img> in the DOM, either inline HTML properties or via CSS, viewbox property only applies to the SVG file."
 
 Make sure all Inkscape units are in mm
 Tried to add viewBox to the svg like this:
@@ -35,31 +35,23 @@ Tried to add viewBox to the svg like this:
 
 viewBox has to be after height and width, otherwise it assumes pixels (I think you have to save the svg in Inkscape before doing this)
 
-Editing the gcode file:
-
-:g/G00 Z5.000000/s//M03 S30/g
-:g/Z-0.125000/s///g
-:g/G01  F100.0(Penetrate)/s//M03 S90/g   
-
-Maybe add F10000 (does this need G something first) :at the start and change F400 to something faster
-
 PATHS BEING REPEATED:
 
 This seems to be an issue with changing from Python2 to Python3:
 https://inkscape.org/forums/cutplot/path-to-gcode-duplicate-lines-wrong-number-of-passes-workaround/
 
-Hi all
-The simple and shortest solution is to remove 1 from the following line in the file gcodetools.py.
-for step in range(0, 1 + int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
-Well, after editing it should look like this:
-for step in range(0, int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
-OR you can just change the cutting order to ‘Pass by Pass’
+>Hi all
+>The simple and shortest solution is to remove 1 from the following line in the file gcodetools.py.
+>for step in range(0, 1 + int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
+>Well, after editing it should look like this:
+>for step in range(0, int(math.ceil(abs((zs - d) / self.tools[layer][0]["depth step"])))):
+>OR you can just change the cutting order to ‘Pass by Pass’
 
 For p5js file:
 
 This library allows you to save files in generic svg format: https://github.com/zenozeng/p5.js-svg
 
-Once you have your file, open it in Inkscape:
+Once you have your file, open Inkscape and then import the svg (the svg format is d:
 
     (these issues with ViewBox etc. might be resolved by making sure that all the Inkscape units are in mm, and that ViewBox is set in document properties, then importing the svg rather than opening it. THIS NEEDS TO BE TESTED
     • In document properties, set the display units and size units to mm and choose the size of paper you want e.g. A3 landscape
@@ -84,16 +76,14 @@ To create gcode:
     • Click “Apply” button
     • There will be some error messages, but the program will create a file with .ngc extension in the output folder under your home directory (I think you need to create this directory first)
     • Rename the gcode file from output_9999.ngc to required file name e.g. yourfile.ngc
-    • Open the gcode file and change the following:
-      
-Before value
-After value
-G00 Z5.000000
-M03 S30
-Z-0.125000
+    • Open the gcode file with vim and change the following:
+    Editing the gcode file in vim:
 
-G01  F100.0(Penetrate)
-M03 S90
+\:g/G00 Z5.000000/s//M5/g
+\:g/Z-0.125000/s///g
+\:g/G01  F100.0(Penetrate)/s//M03 S20/g   
+
+Maybe add F10000 (does this need G something first) :at the start and change F400 to something faster
 
     • Using your favourite text editor, amend line 46 in simple_stream.py to point to your file e.g. f = open('yourfile.ngc','r'); (or amend simple_stream.py to parameterise the file name…)
     • If pen plotter is set up with pen in correct position, you are ready to run the file: type the following: python2 simple_stream.py
